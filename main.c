@@ -3,6 +3,8 @@
 #include <sys/types.h> 
 #include <fcntl.h> 
 #include <string.h>
+#include <stdlib.h>
+#include "str_func.h"
 
 struct BPB {
 	unsigned short bytes_per_sec;
@@ -70,12 +72,18 @@ void info_cmd(struct BPB* bpb) {
 	printf("Root Cluster: %u\n", bpb->root_clus);
 }
 
+void ls_cmd(struct BPB* bpb, int file) {
+
+}
+
+
 int main(int argc, char** argv) {
 	struct BPB bpb;
-	char buf[100];
+	char* buf;
+	buf = (char*) malloc(sizeof(char) * 101);
 	
 	if(argc != 2) {
-		printf("Wrong number of arguements\n");
+		printf("Wrong number of arguments\n");
 		return 0;
 	}
 
@@ -86,11 +94,15 @@ int main(int argc, char** argv) {
 	while(1) {
 		printf("$ ");
 		fgets(buf, 100, stdin);
+		strtok(buf, "\n");
 
-		if(strcmp(buf, "exit\n") == 0) {
+		pathparts cmd;
+		splitString(&cmd, buf, " ");
+
+		if(strcmp(cmd.parts[0], "exit") == 0) {
 			return 0;
 		}
-		else if(strcmp(buf, "info\n") == 0) {
+		else if(strcmp(cmd.parts[0], "info") == 0) {
 			info_cmd(&bpb);
 		}
 	}
