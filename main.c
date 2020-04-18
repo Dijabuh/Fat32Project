@@ -16,6 +16,13 @@ struct BPB {
 	unsigned int root_clus;
 }__attribute__((packed));
 
+struct DIRENTRY {
+	unsigned char dir_name[11];
+	unsigned char dir_attr;
+	unsigned short hi_fst_clus;
+	unsigned short lo_fst_clus;
+}__attribute__((packed));
+
 void getBPB(struct BPB* bpb, int file) {
 	unsigned char ch1, ch2, ch3, ch4;
 	//bytes per sec
@@ -72,8 +79,128 @@ void info_cmd(struct BPB* bpb) {
 	printf("Root Cluster: %u\n", bpb->root_clus);
 }
 
-void ls_cmd(struct BPB* bpb, int file) {
+//returns the offset in bytes of the data location of the given cluster
+unsigned int get_data_location(unsigned int cluster, struct BPB* bpb) {
+	return bpb->bytes_per_sec * (((cluster - 2) * bpb->sec_per_clus) + (bpb->rsvd_sec_cnt + (bpb->num_fats * bpb->fat_sz_32))); 
+}
 
+void get_dir_entry(struct DIRENTRY* de, int file, unsigned int location) {
+	lseek(file, location, SEEK_SET);
+	read(file, &(de->dir_name), 11);
+	read(file, &(de->dir_attr), 1);
+	lseek(file, location+20, SEEK_SET);
+	unsigned char ch1, ch2;
+	read(file, &ch1, 1);
+	read(file, &ch2, 1);
+	de->hi_fst_clus = (ch2 << 8) + ch1;
+	lseek(file, location+26, SEEK_SET);
+	read(file, &ch1, 1);
+	read(file, &ch2, 1);
+	de->lo_fst_clus = (ch2 << 8) + ch1;
+
+	//remove trailing spaces from name
+	for(int i = 10; i >= 0; i--) {
+		if(de->dir_name[i] == 0x20) {
+			de->dir_name[i] = '\0';
+		}
+		else {
+			break;
+		}
+	}
+}
+
+//returns the cluster following the given cluster
+//returns 0 if the given cluster is the last one
+unsigned int get_next_cluster(unsigned int cluster, struct BPB* bpb, int file) {
+	unsigned int byte_offset = bpb->rsvd_sec_cnt * bpb->bytes_per_sec + cluster * 4;
+	lseek(file, byte_offset, SEEK_SET);
+	unsigned char ch1, ch2, ch3, ch4;
+	read(file, &ch1, 1);
+	read(file, &ch2, 1);
+	read(file, &ch3, 1);
+	read(file, &ch4, 1);
+	unsigned int new_clus = (ch4 << 24) + (ch3 << 16) + (ch2 << 8) + ch1;
+
+	if((new_clus >= 0x0FFFFFF8 && new_clus <= 0x0FFFFFFE) || new_clus == 0xFFFFFFFF) {
+		return 0;
+	}
+
+	return new_clus;
+
+}
+
+void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
+	unsigned int clus;
+	if(cmd->numParts == 1) {
+		//ls of currect directory
+		clus = start_cluster;
+	}
+	else if(cmd->numParts == 2) {
+		//run ls on dir name given if it exists
+		//loop through dir entry for given start cluster
+		//if name of one of them matches given name, set its lo/hi first cluster to clus
+		unsigned int temp_clus = start_cluster;
+		int quit = 0;
+		while(temp_clus > 0) {
+			//get data location from cluster number
+			unsigned int location = get_data_location(temp_clus, bpb);
+
+			//loop through all dir entries here
+			for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+				location += 32;
+	
+				//get dir entry
+				struct DIRENTRY de;
+				get_dir_entry(&de, file, location);
+	
+				if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+					clus = (de.hi_fst_clus << 16) + de.lo_fst_clus;
+					quit = 1;
+					break;
+				}
+			}
+			if(quit) {
+				break;
+			}
+			//get next cluster
+			clus = get_next_cluster(clus, bpb, file);
+		}
+		if(!quit) {
+			printf("Directory name does not exists\n");
+			return;
+		}
+	}
+	else {
+		printf("Wrong number of arguements for ls command\n");
+	}
+
+	while(clus > 0) {
+		//get data location from cluster number
+		unsigned int location = get_data_location(clus, bpb);
+
+		//loop through all dir entries here
+		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+			location += 32;
+
+			//get dir entry
+			struct DIRENTRY de;
+			get_dir_entry(&de, file, location);
+
+			if(de.dir_name[0] == 0x00) {
+				return;
+			}
+
+			if(de.dir_attr == 0x0F) {
+				//long name entry, do nothing
+			}
+			else {
+				printf("%s\n", de.dir_name);
+			}
+		}
+
+		//get next cluster
+		clus = get_next_cluster(clus, bpb, file);
+	}
 }
 
 
@@ -91,6 +218,8 @@ int main(int argc, char** argv) {
 
 	getBPB(&bpb, file);
 
+	unsigned int start_cluster = 2;
+
 	while(1) {
 		printf("$ ");
 		fgets(buf, 100, stdin);
@@ -104,6 +233,9 @@ int main(int argc, char** argv) {
 		}
 		else if(strcmp(cmd.parts[0], "info") == 0) {
 			info_cmd(&bpb);
+		}
+		else if(strcmp(cmd.parts[0], "ls") == 0) {
+			ls_cmd(&bpb, file, &cmd, start_cluster);
 		}
 	}
 
