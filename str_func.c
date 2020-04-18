@@ -23,6 +23,9 @@ void splitString(pathparts* ret, char* str, char* c) {
 			(ret->parts)[ret->numParts] = (char*) malloc((strlen(temp) + 1) * sizeof(char));
 			strcpy((ret->parts)[ret->numParts], temp);
 			(ret->numParts)++;
+			if(ret->numParts == 4) {
+				c = "\"";
+			}
 		}
 	}
 
