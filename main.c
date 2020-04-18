@@ -298,7 +298,7 @@ unsigned int cd_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star
 				if(de.dir_name[0] == 0x00) {
 					printf("Directory %s does not exists\n", cmd->parts[1]);
 					return 0;
-				}
+ 				}
 
 				if(de.dir_attr == 0x0F) {
 					//long name entry, do nothing
@@ -324,6 +324,43 @@ unsigned int cd_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star
 		printf("Wrong number of arguements for cd command\n");
 		return 0;
 	}
+}
+
+void creat_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
+	
+	if(cmd->numParts != 2){
+		printf("Wrong number of arguements for creat command\n");
+		return;
+	}
+
+	// run on dir name given if it exists
+	// loop through dir entry for given start cluster
+	// if name of one of them matches given name, returns error
+	unsigned int clus = start_cluster;
+	while(clus > 0) {
+		//get data location from cluster number
+		unsigned int location = get_data_location(clus, bpb);
+		location -= 32;
+
+		//loop through all dir entries here
+		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+			location += 32;
+
+			// get dir entry
+			struct DIRENTRY de;
+			get_dir_entry(&de, file, location);
+
+			if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+				printf("Cannot create file '%s': File exists\n",
+					cmd->parts[1]);
+				return;
+			}
+		}
+		//get next cluster
+		clus = get_next_cluster(clus, bpb, file);
+	}
+	
+	printf("File doesn't exist already\n");
 }
 
 int main(int argc, char** argv) {
@@ -368,7 +405,9 @@ int main(int argc, char** argv) {
 				start_cluster = ret;
 			}
 		}
-
+		else if(strcmp(cmd.parts[0], "creat") == 0) {
+			creat_cmd(&bpb, file, &cmd, start_cluster);
+		}
 	}
 
 	return 0;
