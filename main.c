@@ -104,7 +104,7 @@ void get_dir_entry(struct DIRENTRY* de, int file, unsigned int location) {
 	read(file, &ch2, 1);
 	read(file, &ch3, 1);
 	read(file, &ch4, 1);
-	de->dir_file_size = (ch4 << 12) + (ch3 << 8) + (ch2 << 4) + ch1;
+	de->dir_file_size = (ch4 << 24) + (ch3 << 16) + (ch2 << 8) + ch1;
 
 	//remove trailing spaces from name
 	for(int i = 10; i >= 0; i--) {
@@ -171,7 +171,7 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 				break;
 			}
 			//get next cluster
-			clus = get_next_cluster(clus, bpb, file);
+			temp_clus = get_next_cluster(clus, bpb, file);
 		}
 		if(!quit) {
 			printf("Directory name does not exists\n");
@@ -212,20 +212,16 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 }
 
 void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
-	unsigned int clus;
-	if(cmd->numParts == 1) {
-		//ls of currect directory
-		clus = start_cluster;
-	}
-	else if(cmd->numParts == 2) {
-		//run ls on dir name given if it exists
+	unsigned int clus = start_cluster;
+
+	if(cmd->numParts == 2) {
+		//run size on dir name given if it exists
 		//loop through dir entry for given start cluster
 		//if name of one of them matches given name, set its lo/hi first cluster to clus
-		unsigned int temp_clus = start_cluster;
 		int quit = 0;
-		while(temp_clus > 0) {
+		while(clus > 0) {
 			//get data location from cluster number
-			unsigned int location = get_data_location(temp_clus, bpb);
+			unsigned int location = get_data_location(clus, bpb);
 
 			//loop through all dir entries here
 			for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
@@ -236,6 +232,11 @@ void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 				get_dir_entry(&de, file, location);
 	
 				if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+					if(de.dir_attr != 0x20){
+						printf("File is a directory\n");
+						return;
+					}
+
 					printf("File %s is %d bytes in size.\n",
 						de.dir_name, de.dir_file_size);
 					quit = 1;
