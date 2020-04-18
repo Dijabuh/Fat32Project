@@ -21,6 +21,7 @@ struct DIRENTRY {
 	unsigned char dir_attr;
 	unsigned short hi_fst_clus;
 	unsigned short lo_fst_clus;
+	unsigned int dir_file_size;
 }__attribute__((packed));
 
 void getBPB(struct BPB* bpb, int file) {
@@ -89,7 +90,7 @@ void get_dir_entry(struct DIRENTRY* de, int file, unsigned int location) {
 	read(file, &(de->dir_name), 11);
 	read(file, &(de->dir_attr), 1);
 	lseek(file, location+20, SEEK_SET);
-	unsigned char ch1, ch2;
+	unsigned char ch1, ch2, ch3, ch4;
 	read(file, &ch1, 1);
 	read(file, &ch2, 1);
 	de->hi_fst_clus = (ch2 << 8) + ch1;
@@ -97,6 +98,13 @@ void get_dir_entry(struct DIRENTRY* de, int file, unsigned int location) {
 	read(file, &ch1, 1);
 	read(file, &ch2, 1);
 	de->lo_fst_clus = (ch2 << 8) + ch1;
+	unsigned int DIR_FileSize;
+	lseek(file, location+28, SEEK_SET);
+	read(file, &ch1, 1);
+	read(file, &ch2, 1);
+	read(file, &ch3, 1);
+	read(file, &ch4, 1);
+	de->dir_file_size = (ch4 << 12) + (ch3 << 8) + (ch2 << 4) + ch1;
 
 	//remove trailing spaces from name
 	for(int i = 10; i >= 0; i--) {
@@ -203,6 +211,52 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 	}
 }
 
+void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
+	unsigned int clus;
+	if(cmd->numParts == 1) {
+		//ls of currect directory
+		clus = start_cluster;
+	}
+	else if(cmd->numParts == 2) {
+		//run ls on dir name given if it exists
+		//loop through dir entry for given start cluster
+		//if name of one of them matches given name, set its lo/hi first cluster to clus
+		unsigned int temp_clus = start_cluster;
+		int quit = 0;
+		while(temp_clus > 0) {
+			//get data location from cluster number
+			unsigned int location = get_data_location(temp_clus, bpb);
+
+			//loop through all dir entries here
+			for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+				location += 32;
+	
+				//get dir entry
+				struct DIRENTRY de;
+				get_dir_entry(&de, file, location);
+	
+				if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+					printf("File %s is %d bytes in size.\n",
+						de.dir_name, de.dir_file_size);
+					quit = 1;
+					break;
+				}
+			}
+			if(quit) {
+				break;
+			}
+			//get next cluster
+			clus = get_next_cluster(clus, bpb, file);
+		}
+		if(!quit) {
+			printf("Directory name does not exists\n");
+			return;
+		}
+	}
+	else {
+		printf("Wrong number of arguements for size command\n");
+	}
+}
 
 int main(int argc, char** argv) {
 	struct BPB bpb;
@@ -236,6 +290,9 @@ int main(int argc, char** argv) {
 		}
 		else if(strcmp(cmd.parts[0], "ls") == 0) {
 			ls_cmd(&bpb, file, &cmd, start_cluster);
+		}
+		else if(strcmp(cmd.parts[0], "size") == 0) {
+			size_cmd(&bpb, file, &cmd, start_cluster);
 		}
 	}
 
