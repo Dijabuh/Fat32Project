@@ -164,7 +164,7 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 	
 				if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
 					if(de.dir_attr != 0x10){
-						printf("File is not a directory\n");
+						printf("%s is not a directory\n", cmd->parts[1]);
 						return;
 					}
 					clus = (de.hi_fst_clus << 16) + de.lo_fst_clus;
@@ -179,7 +179,7 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 			temp_clus = get_next_cluster(clus, bpb, file);
 		}
 		if(!quit) {
-			printf("Directory name does not exists\n");
+			printf("Directory %s does not exists\n", cmd->parts[1]);
 			return;
 		}
 	}
@@ -240,7 +240,7 @@ void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 	
 				if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
 					if(de.dir_attr != 0x20){
-						printf("File is a directory\n");
+						printf("%s is not a file\n", cmd->parts[1]);
 						return;
 					}
 
@@ -257,7 +257,7 @@ void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 			clus = get_next_cluster(clus, bpb, file);
 		}
 		if(!quit) {
-			printf("Directory name does not exists\n");
+			printf("File %s does not exists\n", cmd->parts[1]);
 			return;
 		}
 	}
