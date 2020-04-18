@@ -207,6 +207,9 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 			if(de.dir_attr == 0x0F) {
 				//long name entry, do nothing
 			}
+			else if(de.dir_name[0] == 0xE5) {
+				//empty entry, do nothing
+			}
 			else {
 				printf("%s\n", de.dir_name);
 			}
@@ -246,6 +249,9 @@ void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 
 				if(de.dir_attr == 0x0F) {
 					//long name entry, do nothing
+				}
+				else if(de.dir_name[0] == 0xE5) {
+					//empty entry, do nothing
 				}
 				else if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
 					if(de.dir_attr != 0x20){
@@ -302,6 +308,9 @@ unsigned int cd_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star
 
 				if(de.dir_attr == 0x0F) {
 					//long name entry, do nothing
+				}
+				else if(de.dir_name[0] == 0xE5) {
+					//empty entry, do nothing
 				}
 				else if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
 					if(de.dir_attr != 0x10){
