@@ -152,6 +152,7 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 		while(temp_clus > 0) {
 			//get data location from cluster number
 			unsigned int location = get_data_location(temp_clus, bpb);
+			location -= 32;
 
 			//loop through all dir entries here
 			for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
@@ -162,6 +163,10 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 				get_dir_entry(&de, file, location);
 	
 				if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+					if(de.dir_attr != 0x10){
+						printf("File is not a directory\n");
+						return;
+					}
 					clus = (de.hi_fst_clus << 16) + de.lo_fst_clus;
 					quit = 1;
 					break;
@@ -223,6 +228,7 @@ void size_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 		while(clus > 0) {
 			//get data location from cluster number
 			unsigned int location = get_data_location(clus, bpb);
+			location -= 32;
 
 			//loop through all dir entries here
 			for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
