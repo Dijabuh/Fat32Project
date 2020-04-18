@@ -383,7 +383,7 @@ int main(int argc, char** argv) {
 		else if(strcmp(cmd.parts[0], "creat") == 0) {
 			int exists = file_exists(&bpb, file, &cmd, start_cluster);
 			if(exists == 1)
-				printf("File %s already exists\n", cmd->parts[1]);
+				printf("File %s already exists\n", cmd.parts[1]);
 			else if(exists == -1)
 				printf("Wrong number of arguements for creat command\n");
 			else{
