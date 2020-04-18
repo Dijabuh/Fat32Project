@@ -131,6 +131,7 @@ unsigned int get_next_cluster(unsigned int cluster, struct BPB* bpb, int file) {
 
 	if((new_clus >= 0x0FFFFFF8 && new_clus <= 0x0FFFFFFE) || new_clus == 0xFFFFFFFF) {
 		return 0;
+		printf("here\n");
 	}
 
 	return new_clus;
@@ -335,6 +336,240 @@ unsigned int cd_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star
 	}
 }
 
+//returns the cluster number of the first empty(0x00000000) cluster
+unsigned int get_next_empty_cluster(struct BPB* bpb, int file) {
+	//go to start of FAT section
+	lseek(file, bpb->rsvd_sec_cnt * bpb->bytes_per_sec, SEEK_SET);
+	for(unsigned int i = 0; i < bpb->num_fats * bpb->fat_sz_32; i++) {
+		//get in 4 bytes
+		unsigned char ch1, ch2, ch3, ch4;
+		read(file, &ch1, 1);
+		read(file, &ch2, 1);
+		read(file, &ch3, 1);
+		read(file, &ch4, 1);
+
+		unsigned int clus_val = (ch4 << 24) + (ch3 << 16) + (ch2 << 8) + ch1;
+
+		if(clus_val == 0x00000000) {
+			//is an empty cluster, return the cluster number i
+			return i;
+		}	
+	}
+	return 0;
+}
+
+//sets the value of the next cluster for the currect cluster
+void set_next_cluster(struct BPB* bpb, int file, unsigned int cur_cluster, unsigned int next_cluster) {
+	lseek(file, (bpb->rsvd_sec_cnt * bpb->bytes_per_sec) + (cur_cluster * 4), SEEK_SET);
+	//write the value of next_cluster
+	unsigned char ch1, ch2, ch3, ch4;
+	ch1 = (next_cluster & 0xFF);
+	ch2 = ((next_cluster >> 8) & 0xFF);
+	ch3 = ((next_cluster >> 16) & 0xFF);
+	ch4 = ((next_cluster >> 24) & 0xFF);
+	write(file, &ch1, 1);
+	write(file, &ch2, 1);
+	write(file, &ch3, 1);
+	write(file, &ch4, 1);
+}
+
+void create_new_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int dir_entry_location, unsigned int parent_clus, unsigned int dir_clus) {
+
+	//create a new cluster for the new directory
+	unsigned int new_dir_clus = dir_clus;
+	unsigned int clus = parent_clus;
+	unsigned int location = dir_entry_location;
+
+	//put in data for the new dir entry 
+	//get data location
+	lseek(file, location, SEEK_SET);
+	//set name
+	for(int i = 0; i < 8; i++) {
+		if(i < strlen(cmd->parts[1])) {
+			write(file, &(cmd->parts[1][i]), 1);
+		}
+		else {
+			write(file, " ", 1);
+		}
+	}
+	write(file, "   ", 3);
+	//write dir attr
+	char tmp = 0x10;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0\0\0\0\0", 8);
+	//write hi bits of cluster
+	tmp = (new_dir_clus >> 16) & 0xFF;
+	write(file, &tmp, 1);
+	tmp = (new_dir_clus >> 24) & 0xFF;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0", 4);
+	//write lo bits of cluster
+	tmp = new_dir_clus & 0xFF;
+	write(file, &tmp, 1);
+	tmp = (new_dir_clus >> 8) & 0xFF;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0", 4);
+
+	//in data location for new directory, put in dir entries for . and ..
+	location = get_data_location(new_dir_clus, bpb);
+	lseek(file, location, SEEK_SET);
+	//set name
+	write(file, ".          ", 11);
+	//write dir attr
+	tmp = 0x10;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0\0\0\0\0", 8);
+	//write hi bits of cluster
+	tmp = (new_dir_clus >> 16) & 0xFF;
+	write(file, &tmp, 1);
+	tmp = (new_dir_clus >> 24) & 0xFF;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0", 4);
+	//write lo bits of cluster
+	tmp = new_dir_clus & 0xFF;
+	write(file, &tmp, 1);
+	tmp = (new_dir_clus >> 8) & 0xFF;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0", 4);
+	//set name
+	write(file, "..         ", 11);
+	//write dir attr
+	tmp = 0x10;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0\0\0\0\0", 8);
+	//write hi bits of cluster
+	tmp = (clus >> 16) & 0xFF;
+	write(file, &tmp, 1);
+	tmp = (clus >> 24) & 0xFF;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0", 4);
+	//write lo bits of cluster
+	tmp = clus & 0xFF;
+	write(file, &tmp, 1);
+	tmp = (clus >> 8) & 0xFF;
+	write(file, &tmp, 1);
+	//write 0s to unused bits
+	write(file, "\0\0\0\0", 4);
+}
+
+void mkdir_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster) {
+	if(cmd->numParts != 2) {
+		printf("Wrong number of arguements for mkdir command\n");
+		return;
+	}
+
+	//first check if given dirname already exists
+	unsigned int clus = star_cluster;
+
+	while(clus > 0) {
+		//get data location from cluster number
+		unsigned int location = get_data_location(clus, bpb);
+		location -= 32;
+
+		int quit = 0;
+		//loop through all dir entries here
+		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+			location += 32;
+
+			//get dir entry
+			struct DIRENTRY de;
+			get_dir_entry(&de, file, location);
+	
+			if(de.dir_name[0] == 0x00) {
+				quit = 1;
+				break;
+			}
+
+			if(de.dir_attr == 0x0F) {
+				//long name entry, do nothing
+			}
+			else if(de.dir_name[0] == 0xE5) {
+				//empty entry, do nothing
+			}
+			else if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+				printf("%s already exists\n", cmd->parts[1]);
+				return;
+			}
+		}
+		//get next cluster
+		clus = get_next_cluster(clus, bpb, file);
+		if(quit) {
+			break;
+		}
+	}
+
+	//now, loop through all dir entries in starting cluster
+	//if we encounter an empty one, add a new direntry there
+	clus = star_cluster;
+	unsigned int last_cluster;
+	while(clus > 0) {
+		//get data location from cluster number
+		unsigned int location = get_data_location(clus, bpb);
+		location -= 32;
+
+		int quit = 0;
+		//loop through all dir entries here
+		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+			location += 32;
+
+			//get dir entry
+			struct DIRENTRY de;
+			get_dir_entry(&de, file, location);
+	
+			if(de.dir_name[0] == 0x00 || de.dir_name[0] == 0xE5) {
+				//add dir entry here
+				//create a new cluster for the new directory
+				unsigned int new_dir_clus = get_next_empty_cluster(bpb, file);
+				//set its next cluster to 0xFFFFFFFF
+				set_next_cluster(bpb, file, new_dir_clus, 0xFFFFFFFF);
+
+				create_new_dir(bpb, file, cmd, location, clus, new_dir_clus);
+				//make next entry empty
+				//char tmp;
+				//tmp = 0xE5;
+				//write(file, &tmp, 1);
+				return;
+			}
+			if(de.dir_attr == 0x0F) {
+				//long name entry, do nothing
+			}
+		}
+		//get next cluster
+		last_cluster = clus;
+		clus = get_next_cluster(clus, bpb, file);
+	}
+	//if we are here, all dir entries are taken
+	//need to allocate new cluster for current directory
+	unsigned next_dir_clus = get_next_empty_cluster(bpb, file);
+	//set the next cluster for the last one we were at to the newly allocated one
+	set_next_cluster(bpb, file, last_cluster, next_dir_clus);
+	//set the next cluster for the newly allocated one to 0xFFFFFFFF
+	set_next_cluster(bpb, file, next_dir_clus, 0xFFFFFFFF);
+
+	//create a new cluster for the new directory
+	unsigned int new_dir_clus = get_next_empty_cluster(bpb, file);
+	//set its next cluster to 0xFFFFFFFF
+	set_next_cluster(bpb, file, new_dir_clus, 0xFFFFFFFF);
+
+	//put in data for the new dir entry 
+	//get data location
+	unsigned int location = get_data_location(next_dir_clus, bpb);
+	create_new_dir(bpb, file, cmd, location, next_dir_clus, new_dir_clus);
+	//make next entry empty
+	lseek(file, location + 32, SEEK_SET);
+	char tmp;
+	tmp = 0x00;
+	write(file, &tmp, 1);
+}
+
 int main(int argc, char** argv) {
 	struct BPB bpb;
 	char* buf;
@@ -376,6 +611,9 @@ int main(int argc, char** argv) {
 			if(ret > 0) {
 				start_cluster = ret;
 			}
+		}
+		else if(strcmp(cmd.parts[0], "mkdir") == 0) {
+			mkdir_cmd(&bpb, file, &cmd, start_cluster);
 		}
 
 	}
