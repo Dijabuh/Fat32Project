@@ -185,6 +185,7 @@ void ls_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 	while(clus > 0) {
 		//get data location from cluster number
 		unsigned int location = get_data_location(clus, bpb);
+		location -= 32;
 
 		//loop through all dir entries here
 		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
