@@ -43,3 +43,4 @@ void mkdir_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_clus
 void create_new_file(struct BPB* bpb, int file, pathparts* cmd, unsigned int dir_entry_location, unsigned int parent_clus, unsigned int dir_clus);
 void creat_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
+void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
