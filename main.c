@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "str_func.h"
 
+
 struct BPB {
 	unsigned short bytes_per_sec;
 	unsigned char sec_per_clus;
@@ -23,6 +24,8 @@ struct DIRENTRY {
 	unsigned short lo_fst_clus;
 	unsigned int dir_file_size;
 }__attribute__((packed));
+
+void mv_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 
 void getBPB(struct BPB* bpb, int file) {
 	unsigned char ch1, ch2, ch3, ch4;
@@ -573,6 +576,100 @@ void mkdir_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_clus
 	write(file, &tmp, 1);
 }
 
+int main(int argc, char** argv) {
+	struct BPB bpb;
+	char* buf;
+	buf = (char*) malloc(sizeof(char) * 101);
+	
+	if(argc != 2) {
+		printf("Wrong number of arguments\n");
+		return 0;
+	}
+
+	int file = open(argv[1], O_RDWR);
+
+	getBPB(&bpb, file);
+
+	unsigned int start_cluster = 2;
+
+	while(1) {
+		printf("$ ");
+		fgets(buf, 100, stdin);
+		strtok(buf, "\n");
+
+		pathparts cmd;
+		splitString(&cmd, buf, " ");
+
+		if(strcmp(cmd.parts[0], "exit") == 0) {
+			return 0;
+		}
+		else if(strcmp(cmd.parts[0], "info") == 0) {
+			info_cmd(&bpb);
+		}
+		else if(strcmp(cmd.parts[0], "ls") == 0) {
+			ls_cmd(&bpb, file, &cmd, start_cluster);
+		}
+		else if(strcmp(cmd.parts[0], "size") == 0) {
+			size_cmd(&bpb, file, &cmd, start_cluster);
+		}
+		else if(strcmp(cmd.parts[0], "cd") == 0) {
+			int ret = cd_cmd(&bpb, file, &cmd, start_cluster);
+			if(ret > 0) {
+				start_cluster = ret;
+			}
+		}
+		else if(strcmp(cmd.parts[0], "mkdir") == 0) {
+			mkdir_cmd(&bpb, file, &cmd, start_cluster);
+		}
+		else if(strcmp(cmd.parts[0], "creat") == 0) {
+			int exists = file_exists(&bpb, file, &cmd, start_cluster);
+			if(exists == 1)
+				printf("File %s already exists\n", cmd.parts[1]);
+			else if(exists == -1)
+				printf("Wrong number of arguements for creat command\n");
+			else{
+				// run creat command
+			}
+		}
+		else if(strcmp(cmd.parts[0], "mv") == 0) {
+			mv_cmd(&bpb, file, &cmd, start_cluster);
+		}
+	}
+
+	return 0;
+}
+
+int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
+	
+	if(cmd->numParts != 2) { return -1; }
+
+	// run on dir name given if it exists
+	// loop through dir entry for given start cluster
+	// if name of one of them matches given name, returns error
+	unsigned int clus = start_cluster;
+	while(clus > 0) {
+		//get data location from cluster number
+		unsigned int location = get_data_location(clus, bpb);
+		location -= 32;
+
+		//loop through all dir entries here
+		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+			location += 32;
+
+			// get dir entry
+			struct DIRENTRY de;
+			get_dir_entry(&de, file, location);
+
+			if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+				return 1;
+			}
+		}
+		//get next cluster
+		clus = get_next_cluster(clus, bpb, file);
+	}
+	return 0;
+}
+
 void mv_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster) {
 	if(cmd->numParts != 3) {
 		printf("Wrong number of arguements for mv command\n");
@@ -877,98 +974,4 @@ void mv_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster
 			write(file, " ", 1);
 		}
 	}
-}
-
-int main(int argc, char** argv) {
-	struct BPB bpb;
-	char* buf;
-	buf = (char*) malloc(sizeof(char) * 101);
-	
-	if(argc != 2) {
-		printf("Wrong number of arguments\n");
-		return 0;
-	}
-
-	int file = open(argv[1], O_RDWR);
-
-	getBPB(&bpb, file);
-
-	unsigned int start_cluster = 2;
-
-	while(1) {
-		printf("$ ");
-		fgets(buf, 100, stdin);
-		strtok(buf, "\n");
-
-		pathparts cmd;
-		splitString(&cmd, buf, " ");
-
-		if(strcmp(cmd.parts[0], "exit") == 0) {
-			return 0;
-		}
-		else if(strcmp(cmd.parts[0], "info") == 0) {
-			info_cmd(&bpb);
-		}
-		else if(strcmp(cmd.parts[0], "ls") == 0) {
-			ls_cmd(&bpb, file, &cmd, start_cluster);
-		}
-		else if(strcmp(cmd.parts[0], "size") == 0) {
-			size_cmd(&bpb, file, &cmd, start_cluster);
-		}
-		else if(strcmp(cmd.parts[0], "cd") == 0) {
-			int ret = cd_cmd(&bpb, file, &cmd, start_cluster);
-			if(ret > 0) {
-				start_cluster = ret;
-			}
-		}
-		else if(strcmp(cmd.parts[0], "mkdir") == 0) {
-			mkdir_cmd(&bpb, file, &cmd, start_cluster);
-		}
-		else if(strcmp(cmd.parts[0], "creat") == 0) {
-			int exists = file_exists(&bpb, file, &cmd, start_cluster);
-			if(exists == 1)
-				printf("File %s already exists\n", cmd.parts[1]);
-			else if(exists == -1)
-				printf("Wrong number of arguements for creat command\n");
-			else{
-				// run creat command
-			}
-		}
-		else if(strcmp(cmd.parts[0], "mv") == 0) {
-			mv_cmd(&bpb, file, &cmd, start_cluster);
-		}
-	}
-
-	return 0;
-}
-
-int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
-	
-	if(cmd->numParts != 2) { return -1; }
-
-	// run on dir name given if it exists
-	// loop through dir entry for given start cluster
-	// if name of one of them matches given name, returns error
-	unsigned int clus = start_cluster;
-	while(clus > 0) {
-		//get data location from cluster number
-		unsigned int location = get_data_location(clus, bpb);
-		location -= 32;
-
-		//loop through all dir entries here
-		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
-			location += 32;
-
-			// get dir entry
-			struct DIRENTRY de;
-			get_dir_entry(&de, file, location);
-
-			if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
-				return 1;
-			}
-		}
-		//get next cluster
-		clus = get_next_cluster(clus, bpb, file);
-	}
-	return 0;
 }
