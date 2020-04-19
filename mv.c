@@ -299,7 +299,6 @@ void mv_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster
 		return;
 	}
 
-				printf("here\n");
 	//if to does not exists, change the name of the dir entry for from
 	lseek(file, from_entry_loc, SEEK_SET);
 	for(int i = 0; i < 8; i++) {
