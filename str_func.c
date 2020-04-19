@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include "str_func.h"
+#include "headers.h"
 
 void splitString(pathparts* ret, char* str, char* c) {
 	char* temp = NULL;
