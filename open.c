@@ -17,18 +17,19 @@ int check_entry(opentable* table, unsigned int start_cluster){
 }
 
 void add_entry(opentable* table, unsigned int start_cluster, char* mode){
-	if(table->size++){
-		table->opened = (openentry*)realloc(table->opened, sizeof(openentry)*table->size);
+	if(table->size){
+		table->opened = (openentry*)realloc(table->opened, sizeof(openentry)*(table->size+1));
+		table->opened[table->size].start_cluster = start_cluster;
+		table->opened[table->size].mode = (char*)malloc(sizeof(mode));
+		strcpy(table->opened[table->size].mode, mode);
+	}
+	else{
+		table->opened = (openentry*)malloc(sizeof(openentry));
 		table->opened[0].start_cluster = start_cluster;
 		table->opened[0].mode = (char*)malloc(sizeof(mode));
 		strcpy(table->opened[0].mode, mode);
 	}
-	else{
-		table->opened = (openentry*)malloc(sizeof(openentry));
-		table->opened[table->size-1].start_cluster = start_cluster;
-		table->opened[table->size-1].mode = (char*)malloc(sizeof(mode));
-		strcpy(table->opened[table->size-1].mode, mode);
-	}
+	++table->size;
 }
 
 void copy_entry(openentry* dest, openentry* src){
@@ -74,7 +75,7 @@ unsigned int start_cluster, opentable* table){
 	int file_clus;
 	file_clus = get_file_clus(bpb, file, cmd, start_cluster);
 	if(file_clus == 0){
-		printf("%d not found\n", file_clus);
+		printf("%s not found\n", cmd->parts[1]);
 		return;
 	}
 	// checks file type
@@ -86,10 +87,27 @@ unsigned int start_cluster, opentable* table){
 	}
 	// checks if entry exists
 	if(check_entry(table, file_clus)){
-		printf("%s is already open\n");
+		printf("%s is already open\n", cmd->parts[1]);
 		return;
 	}
 
 	add_entry(table, file_clus, cmd->parts[2]);
-	print(table);
+}
+
+void close_cmd(struct BPB* bpb, int file, pathparts* cmd, 
+unsigned int start_cluster, opentable* table){
+	
+	if(cmd->numParts != 2){
+		printf("Wrong number of arguments for close\n");
+		return;
+	}
+	// finds existing file by start cluster
+	int file_clus;
+	file_clus = get_file_clus(bpb, file, cmd, start_cluster);
+	if(file_clus == 0){
+		printf("%d not found\n", file_clus);
+		return;
+	}
+	if(remove_entry(table, file_clus) == 0)
+		printf("No entry for %s found\n", cmd->parts[1]);
 }

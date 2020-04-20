@@ -69,6 +69,9 @@ int main(int argc, char** argv) {
 		else if(strcmp(cmd.parts[0], "open") == 0) {
 			open_cmd(&bpb, file, &cmd, start_cluster, &table);
 		}
+		else if(strcmp(cmd.parts[0], "close") == 0) {
+			close_cmd(&bpb, file, &cmd, start_cluster, &table);
+		}
 	}
 
 	return 0;

@@ -61,3 +61,4 @@ int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 void open_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
+void close_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
