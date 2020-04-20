@@ -27,7 +27,7 @@ void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster
 	struct DIRENTRY file_dir_entry;
 	struct DIRENTRY to_dir_entry;
 
-	int quit= 0;
+	int quit = 0;
 	while(clus > 0) {
 		//get data location from cluster number
 		unsigned int location = get_data_location(clus, bpb);
@@ -74,8 +74,8 @@ void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster
 	}
 
 	//check if to exists
-	//
 	quit = 0;
+	clus = star_cluster;
 	int to_exists = 0;
 	while(clus > 0) {
 		//get data location from cluster number
