@@ -60,5 +60,7 @@ int get_file_type(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_
 int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, struct DIRENTRY* der);
 void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
+int check_entry(opentable* table, unsigned int start_cluster);
 void open_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
 void close_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
+void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
