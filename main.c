@@ -60,6 +60,9 @@ int main(int argc, char** argv) {
 		else if(strcmp(cmd.parts[0], "rm") == 0) {
 			rm_cmd(&bpb, file, &cmd, start_cluster);
 		}
+		else if(strcmp(cmd.parts[0], "cp") == 0) {
+			cp_cmd(&bpb, file, &cmd, start_cluster);
+		}
 	}
 
 	return 0;

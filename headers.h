@@ -44,3 +44,4 @@ void create_new_file(struct BPB* bpb, int file, pathparts* cmd, unsigned int dir
 void creat_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
 void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
+void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
