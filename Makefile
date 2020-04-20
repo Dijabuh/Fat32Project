@@ -1,7 +1,7 @@
 CC = gcc
 STND = -std=c99
 
-F32: main.c str_func.o bpb.o cd.o cluster.o create.o ls.o mkdir.o mv.o size.o rm.o cp.o
+F32: main.c str_func.o bpb.o cd.o cluster.o create.o ls.o mkdir.o mv.o size.o rm.o cp.o open.o
 	$(CC) $^ -g -o F32.out $(STND)
 
 str_func.o: str_func.c
@@ -36,6 +36,9 @@ rm.o: rm.c
 
 cp.o: cp.c
 	$(CC) $^ -g -c -o cp.o $(STND)
+
+open.o: open.c
+	$(CC) $^ -g -c -o open.o $(STND)
 
 clean:
 	rm -f *.o *.out

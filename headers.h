@@ -25,6 +25,19 @@ struct DIRENTRY {
 	unsigned int dir_file_size;
 }__attribute__((packed));
 
+// keeps track of open files
+typedef struct
+{
+	unsigned int start_cluster;
+	char* mode;
+} openentry;
+
+typedef struct
+{
+	openentry* opened;
+	int size;
+} opentable;
+
 //function definitions
 void splitString(pathparts* ret, char* str, char* c);
 void mv_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
@@ -42,6 +55,9 @@ void create_new_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int dir_
 void mkdir_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 void create_new_file(struct BPB* bpb, int file, pathparts* cmd, unsigned int dir_entry_location, unsigned int parent_clus, unsigned int dir_clus);
 void creat_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
-int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
+unsigned int get_file_clus(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
+int get_file_type(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
+int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, struct DIRENTRY* der);
 void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
+void open_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);

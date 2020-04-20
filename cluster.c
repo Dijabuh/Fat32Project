@@ -192,9 +192,21 @@ void create_new_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int dir_
 	write(file, "\0\0\0\0", 4);
 }
 
-int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
-	
-	if(cmd->numParts != 2) { return -1; }
+unsigned int get_file_clus(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster) {
+	struct DIRENTRY de;
+	if(get_dir(bpb, file, cmd, start_cluster, &de) != 1) return 0;
+	return (de.hi_fst_clus << 16) + de.lo_fst_clus;
+}
+
+int get_file_type(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster){
+	struct DIRENTRY de;
+	if(get_dir(bpb, file, cmd, start_cluster, &de) != 1) return 0;
+	return de.dir_attr == 0x20 ? 2 : 1;
+}
+
+int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, struct DIRENTRY* der) {
+
+	if(cmd->numParts < 2) return -1;
 
 	// run on dir name given if it exists
 	// loop through dir entry for given start cluster
@@ -214,6 +226,11 @@ int file_exists(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cl
 			get_dir_entry(&de, file, location);
 
 			if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+				strcpy(der->dir_name, de.dir_name);
+				der->dir_attr = de.dir_attr;
+				der->hi_fst_clus = de.hi_fst_clus;
+				der->lo_fst_clus = de.lo_fst_clus;
+				der->dir_file_size = de.dir_file_size;
 				return 1;
 			}
 		}

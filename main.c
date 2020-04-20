@@ -7,6 +7,7 @@
 #include "headers.h"
 
 int main(int argc, char** argv) {
+	
 	struct BPB bpb;
 	char* buf;
 	buf = (char*) malloc(sizeof(char) * 101);
@@ -20,6 +21,8 @@ int main(int argc, char** argv) {
 
 	getBPB(&bpb, file);
 
+	opentable table;
+	table.size = 0;
 	unsigned int start_cluster = 2;
 
 	while(1) {
@@ -62,6 +65,9 @@ int main(int argc, char** argv) {
 		}
 		else if(strcmp(cmd.parts[0], "cp") == 0) {
 			cp_cmd(&bpb, file, &cmd, start_cluster);
+		}
+		else if(strcmp(cmd.parts[0], "open") == 0) {
+			open_cmd(&bpb, file, &cmd, start_cluster, &table);
 		}
 	}
 
