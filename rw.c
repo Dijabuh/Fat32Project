@@ -44,13 +44,26 @@ void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 	}
 	if(offset + size >= de.dir_file_size)
 		size = de.dir_file_size - offset;
-
-	int location = get_data_location(get_file_clus(
-		bpb, file, cmd, start_cluster), bpb) + offset;
+	
+	int cluster_offset = offset / 512;
+	unsigned int cluster = get_file_clus(bpb, file, cmd, start_cluster);
+	offset %= 512;
+	while(cluster_offset > 0){
+		cluster = get_next_cluster(cluster, bpb, file);
+		--cluster_offset;
+	}
+	
+	unsigned int location = get_data_location(cluster, bpb) + offset;
 	lseek(file, location, SEEK_SET);
 	int i;
 	char tmp;
+
 	for(i = 0; i < size; ++i){
+		if(i % 512 == 0 && i > 0){
+			cluster = get_next_cluster(cluster, bpb, file);
+			location = get_data_location(cluster, bpb);
+			lseek(file, location, SEEK_SET);
+		}
 		read(file, &tmp, 1);
 		printf("%c", tmp);
 	}
