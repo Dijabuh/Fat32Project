@@ -38,19 +38,19 @@ void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 	int offset, size;
 	offset = atoi(cmd->parts[2]);
 	size = atoi(cmd->parts[3]);
-	if(offset > de.dir_file_size){
+	if(offset >= de.dir_file_size){
 		printf("Offset out of bounds\n");
 		return;
 	}
-	if(offset + size > de.dir_file_size)
+	if(offset + size >= de.dir_file_size)
 		size = de.dir_file_size - offset;
 
 	int location = get_data_location(get_file_clus(
 		bpb, file, cmd, start_cluster), bpb) + offset;
 	lseek(file, location, SEEK_SET);
-	int i = 0;
+	int i;
 	char tmp;
-	for(; i < size; ++i, lseek(file, 1, SEEK_SET)){
+	for(i = 0; i < size; ++i){
 		read(file, &tmp, 1);
 		printf("%c", tmp);
 	}
