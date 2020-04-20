@@ -55,9 +55,13 @@ unsigned int get_next_cluster(unsigned int cluster, struct BPB* bpb, int file) {
 	read(file, &ch4, 1);
 	unsigned int new_clus = (ch4 << 24) + (ch3 << 16) + (ch2 << 8) + ch1;
 
-	if((new_clus >= 0x0FFFFFF8 && new_clus <= 0x0FFFFFFE) || new_clus == 0xFFFFFFFF) {
+//	if((new_clus >= 0x0FFFFFF8 && new_clus <= 0x0FFFFFFE) || new_clus == 0xFFFFFFFF) {
+//		return 0;
+//	}
+	
+	//trying something new
+	if(new_clus > bpb->tot_sec_32) {
 		return 0;
-		printf("here\n");
 	}
 
 	return new_clus;
