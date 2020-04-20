@@ -31,4 +31,28 @@ void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 		printf("%s isn't opened\n", cmd->parts[1]);
 		return;
 	}
+	
+	struct DIRENTRY de;
+	get_dir(bpb, file, cmd, start_cluster, &de);
+	
+	int offset, size;
+	offset = atoi(cmd->parts[2]);
+	size = atoi(cmd->parts[3]);
+	if(offset > de.dir_file_size){
+		printf("Offset out of bounds\n");
+		return;
+	}
+	if(offset + size > de.dir_file_size)
+		size = de.dir_file_size - offset;
+
+	int location = get_data_location(get_file_clus(
+		bpb, file, cmd, start_cluster), bpb) + offset;
+	lseek(file, location, SEEK_SET);
+	int i = 0;
+	char tmp;
+	for(; i < size; ++i, lseek(file, 1, SEEK_SET)){
+		read(file, &tmp, 1);
+		printf("%c", tmp);
+	}
+	printf("\n");
 }
