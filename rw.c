@@ -19,16 +19,16 @@ void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clus
 		printf("%s not found\n", cmd->parts[1]);
 		return;
 	}
-	// checks file type
-	int dir_attr;
-	dir_attr = get_file_type(bpb, file, cmd, start_cluster);
-	if(dir_attr != 2){
-		printf("%s is wrong file type\n", cmd->parts[1]);
-		return;
-	}
 	// checks if entry exists
 	if(!check_entry(table, file_clus)){
 		printf("%s isn't opened\n", cmd->parts[1]);
+		return;
+	}
+
+	int entry;
+	entry = check_entry(table, file_clus);
+	if(strcmp(table->opened[entry-1].mode, "w") == 0){
+		printf("File is opened as write only\n");
 		return;
 	}
 	
