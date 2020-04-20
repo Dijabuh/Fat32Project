@@ -19,13 +19,15 @@ int check_entry(opentable* table, unsigned int start_cluster){
 void add_entry(opentable* table, unsigned int start_cluster, char* mode){
 	if(table->size++){
 		table->opened = (openentry*)realloc(table->opened, sizeof(openentry)*table->size);
-		table->opened[table->size-1].start_cluster = start_cluster;
+		table->opened[0].start_cluster = start_cluster;
+		table->opened[0].mode = (char*)malloc(sizeof(mode));
 		strcpy(table->opened[0].mode, mode);
 	}
 	else{
 		table->opened = (openentry*)malloc(sizeof(openentry));
 		table->opened[table->size-1].start_cluster = start_cluster;
-		strcpy(table->opened[0].mode, mode);
+		table->opened[table->size-1].mode = (char*)malloc(sizeof(mode));
+		strcpy(table->opened[table->size-1].mode, mode);
 	}
 }
 
@@ -40,6 +42,8 @@ int remove_entry(opentable* table, unsigned int start_cluster){
 	
 	for(--pos; pos+1 < table->size; ++pos)
 		copy_entry(&table->opened[pos], &table->opened[pos+1]);
+
+	free(table->opened[pos].mode);
 	table->opened = (openentry*)realloc(table->opened, sizeof(openentry)*--table->size);
 	return 1;
 }
