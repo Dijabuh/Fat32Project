@@ -58,6 +58,7 @@ void creat_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_clus
 unsigned int get_file_clus(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
 int get_file_type(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
 int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, struct DIRENTRY* der);
+void set_dir_size(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, int new_size);
 void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 int check_entry(opentable* table, unsigned int start_cluster);

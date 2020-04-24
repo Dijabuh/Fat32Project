@@ -9,7 +9,7 @@
 void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table){
 	
 	if(cmd->numParts != 4){
-		printf("Wrong number of arguments for open\n");
+		printf("Wrong number of arguments for read\n");
 		return;
 	}
 	// finds existing file by start cluster
@@ -138,6 +138,7 @@ void write_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clu
 			unsigned int new_dir_clus = get_next_empty_cluster(bpb, file);
 			set_next_cluster(bpb, file, new_dir_clus, 0xFFFFFFFF);
 		}
+		set_dir_size(bpb, file, cmd, start_cluster, (offset + size));
 	}
 
 	// CALCULATES CLUSTERS, OFFSET, SIZE

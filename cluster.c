@@ -239,3 +239,41 @@ int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluste
 	}
 	return 0;
 }
+
+void set_dir_size(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, int new_size) {
+
+	if(cmd->numParts < 2) return;
+
+	unsigned int clus = start_cluster;
+	while(clus > 0) {
+		//get data location from cluster number
+		unsigned int location = get_data_location(clus, bpb);
+		location -= 32;
+
+		//loop through all dir entries here
+		for(int i = 0; i < bpb->bytes_per_sec/32; i++) {
+			location += 32;
+
+			// get dir entry
+			struct DIRENTRY de;
+			get_dir_entry(&de, file, location);
+			
+			if(strcmp(de.dir_name, cmd->parts[1]) == 0) {
+				unsigned int DIR_FileSize;
+				lseek(file, location+28, SEEK_SET);
+				char tmp;
+				tmp = new_size & 255;
+				write(file, &tmp, 1);
+				tmp = (new_size >> 8) & 255;
+				write(file, &tmp, 1);
+				tmp = (new_size >> 16) & 255;
+				write(file, &tmp, 1);
+				tmp = (new_size >> 24) & 255;
+				write(file, &tmp, 1);
+				return;
+			}
+		}
+		//get next cluster
+		clus = get_next_cluster(clus, bpb, file);
+	}
+}
