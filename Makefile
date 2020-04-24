@@ -1,8 +1,8 @@
 CC = gcc
 STND = -std=c99
 
-F32: main.c str_func.o bpb.o cd.o cluster.o create.o ls.o mkdir.o mv.o size.o rm.o cp.o open.o rw.o
-	$(CC) $^ -g -o F32.out $(STND)
+project3: main.c str_func.o bpb.o cd.o cluster.o create.o ls.o mkdir.o mv.o size.o rm.o cp.o open.o rw.o
+	$(CC) $^ -g -o $@ $(STND)
 
 str_func.o: str_func.c
 	$(CC) $^ -g -c -o str_func.o $(STND)
@@ -45,3 +45,6 @@ rw.o: rw.c
 
 clean:
 	rm -f *.o *.out
+
+release:
+	tar -cvf project3_Anderson_Brown.tar *.c *.h commit_log.txt Makefile README.md

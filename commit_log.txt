@@ -1,0 +1,230 @@
+commit 44a78a82d0186dc26201189f12bc737de01ca910
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Thu Apr 23 21:07:21 2020 -0400
+
+    Finished write
+
+commit d0104b1df0d410b860ceb348e862b6c7292fd78f
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Thu Apr 23 20:39:24 2020 -0400
+
+    Write written
+
+commit 637a4df3fb6b426beb411334585fea3c3a0e9811
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 18:29:36 2020 -0400
+
+    Won't let read with write only file
+
+commit 5d8e61f7e0a301710a00e71024be60f18771c17a
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 18:12:55 2020 -0400
+
+    Finished read
+
+commit d2442eff9d71a77337b856183f04650f2835a58b
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 18:00:07 2020 -0400
+
+    Finished read
+
+commit 980e14a21990c58277fb1aa5c328c01711140587
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 17:48:41 2020 -0400
+
+    Added in read
+
+commit 0d4a447c0c5afd73cea7a92d17c9c5089424c202
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 17:30:14 2020 -0400
+
+    Adding basic checks for read
+
+commit 4c3654c1cd3c2505ea2ce19205c1bc8840d93752
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 15:57:37 2020 -0400
+
+    Fixed open and added close
+
+commit 684aef3794f401b3b19a2aefc10f0a4b84e014b2
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 15:09:35 2020 -0400
+
+    Working on table
+
+commit 5b1786e3e60b1af40d6914df46169020c430c27a
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Mon Apr 20 14:05:56 2020 -0400
+
+    Working on open
+
+commit cca44d4d06a806ec65d79fa859fdcf5260d71b87
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 20:42:57 2020 -0400
+
+    Fixed bug with getting next cluster
+
+commit a10e4f834d3a467be88c73d480e6e0bc91da269f
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 20:23:31 2020 -0400
+
+    Bug fixes
+
+commit 60eebe0bd2443dc90a5f240f4922327e27650d14
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 20:12:06 2020 -0400
+
+    Starting on cp function
+
+commit a7e42bb23c4b74568b672d489ad9ac17c7325c72
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 19:33:31 2020 -0400
+
+    Added rm command
+
+commit c739368d285de97b8affa223aacc1965c9f47c8c
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 17:07:20 2020 -0400
+
+    Removed debug message
+
+commit a1f24f419fbc565087f08ce9c402e6da9f776c5a
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 17:05:10 2020 -0400
+
+    Reorganized project, put commands in seperate files
+
+commit 64be917f127146a205157c23a351527436589e5d
+Merge: b1ee177 6a7149d
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 16:46:40 2020 -0400
+
+    Merge branch 'master' of https://github.com/Dijabuh/Fat32Project
+    
+    Conflicts:
+    	main.c
+
+commit b1ee1776c9d597ae356ce3035c5e912885a570ec
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 16:45:19 2020 -0400
+
+    Reorganized
+
+commit 2fe9d2f674f97dd80a7ac04db5a52dd002b98be0
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sun Apr 19 16:39:20 2020 -0400
+
+    Added mv function
+
+commit 6a7149de2e0820bba219b41aec03ee787b254d24
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sun Apr 19 16:19:09 2020 -0400
+
+    Finished creat
+
+commit de85a775e4b08a03a70c539492089f23f7808696
+Merge: b84065a 0edccbc
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sat Apr 18 16:24:24 2020 -0400
+
+    Merge branch 'master' of https://github.com/Dijabuh/Fat32Project
+    
+    Conflicts:
+    	main.c
+
+commit b84065a79e52330e472ef282f871047182e3b240
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sat Apr 18 16:23:16 2020 -0400
+
+    Added mkdir command
+
+commit 0edccbc89d48a088af4294a655ce4170d1ee951f
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sat Apr 18 15:16:35 2020 -0400
+
+    Oops
+
+commit 0aad08088256d29f881d4d5cdfc2dc5081f3fc78
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sat Apr 18 14:56:52 2020 -0400
+
+    Moved code to func that checks if file exists
+
+commit 9451c7f6820d3cc2b2b7b6ae08cf396b08b410a4
+Merge: a388ef7 ab227e0
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sat Apr 18 14:46:50 2020 -0400
+
+    Merge branch 'master' of github.com:Dijabuh/Fat32Project
+
+commit a388ef76da2437c4e66fdfef0a805b90cd615979
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sat Apr 18 14:46:39 2020 -0400
+
+    Working on creat
+
+commit ab227e03338f4abc018b39b9ca644100aefcc8a3
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sat Apr 18 12:53:12 2020 -0400
+
+    Added in check for empty direntry
+
+commit bf1d6a8993d8edbf0f2bfbcd4e529cda4ff9f07e
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sat Apr 18 12:18:26 2020 -0400
+
+    Added cd function
+
+commit ab826ce9909b5b851edbe219e5b97e231ac89075
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sat Apr 18 11:47:43 2020 -0400
+
+    Better error messages
+
+commit 0751108a322c5d8587f884f768d5c7b2e2aec9b4
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Sat Apr 18 11:41:54 2020 -0400
+
+    Fixed small error
+
+commit b1c90cf929ac23b469d271d737020852b342327a
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sat Apr 18 11:37:16 2020 -0400
+
+    Working on ls
+
+commit 0945819f446d1cf6f5af9851a967c54dcfe6c0ad
+Author: Garett Anderson <ga17@my.fsu.edu>
+Date:   Sat Apr 18 11:23:39 2020 -0400
+
+    Finished size
+
+commit 3f7ea35ce5c7ca59e3630f71649c71b6a3dfdfe5
+Author: gjanderso <42012696+gjanderso@users.noreply.github.com>
+Date:   Sat Apr 18 11:08:04 2020 -0400
+
+    Adding size command
+
+commit 138222629b3ba6498a862775136f465636be63fa
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Fri Apr 17 22:52:54 2020 -0400
+
+    Added ls command
+
+commit b195f460b2d29983b1328e29ad6c57fef21f1be7
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Fri Apr 17 20:53:02 2020 -0400
+
+    5th value in command now delimited by "
+
+commit e1bcd8f6e0fd9448a4ffd318255761644783aa5f
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Fri Apr 17 19:47:47 2020 -0400
+
+    Added helper function for input
+
+commit c576d859f870b12a596722e7009ca69c03c78f7b
+Author: Daniel Brown <djb16b@my.fsu.edu>
+Date:   Fri Apr 17 18:24:09 2020 -0400
+
+    initial commit

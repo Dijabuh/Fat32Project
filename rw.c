@@ -156,13 +156,13 @@ void write_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_clu
 	lseek(file, location, SEEK_SET);
 	int i, w_count;
 
-	for(i = 0, w_count = 1; i < size; ++i, ++w_count){
+	for(i = 0; i < size; ++i){
 		if(i % bpb->bytes_per_sec == 0 && i > 0){
 			cluster = get_next_cluster(cluster, bpb, file);
 			location = get_data_location(cluster, bpb);
 			lseek(file, location, SEEK_SET);
 		}
-		if(w_count < sizeof(cmd->parts[4])-1) // could be indexing problem
+		if(i < strlen(cmd->parts[4])) // could be indexing problem
 			write(file, &cmd->parts[4][i], 1);
 		else
 			write(file, 0, 1);
