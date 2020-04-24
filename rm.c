@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster) {
+void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster, opentable* table) {
 	//steps
 	//check if file exists
 	//if not, error
@@ -78,6 +78,8 @@ void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster
 
 	//get first cluster of file
 	clus = (de.hi_fst_clus << 16) + de.lo_fst_clus;
+	//close file if it is opened
+	remove_entry(table, clus);
 
 	while(clus > 0) {
 		//loop through all clusters in this line

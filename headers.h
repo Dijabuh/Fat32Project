@@ -59,10 +59,11 @@ unsigned int get_file_clus(struct BPB* bpb, int file, pathparts* cmd, unsigned i
 int get_file_type(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster);
 int get_dir(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, struct DIRENTRY* der);
 void set_dir_size(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, int new_size);
-void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
+void rm_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster, opentable* table);
 void cp_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int star_cluster);
 int check_entry(opentable* table, unsigned int start_cluster);
 void open_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
 void close_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
 void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
 void write_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
+int remove_entry(opentable* table, unsigned int start_cluster);
