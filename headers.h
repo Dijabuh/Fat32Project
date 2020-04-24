@@ -64,3 +64,4 @@ int check_entry(opentable* table, unsigned int start_cluster);
 void open_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
 void close_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
 void read_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);
+void write_cmd(struct BPB* bpb, int file, pathparts* cmd, unsigned int start_cluster, opentable* table);

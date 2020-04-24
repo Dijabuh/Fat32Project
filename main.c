@@ -75,6 +75,9 @@ int main(int argc, char** argv) {
 		else if(strcmp(cmd.parts[0], "read") == 0) {
 			read_cmd(&bpb, file, &cmd, start_cluster, &table);
 		}
+		else if(strcmp(cmd.parts[0], "write") == 0) {
+			write_cmd(&bpb, file, &cmd, start_cluster, &table);
+		}
 		else
 			printf("Command not found\n");
 	}
