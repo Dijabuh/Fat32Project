@@ -1,5 +1,10 @@
-## COP4610 Project 3
-- Daniel Brown, Garett Anderson
+Fat32 image explorer built in C. Created as project for COP4610
 
-#### Run Instructions
-- Use make to generate executable
+### How to build
+- run make
+
+### How to run 
+- ./project3 name_of_fat32_image
+###
+
+fat32.img.tar.gz is a sample image provided to test on
