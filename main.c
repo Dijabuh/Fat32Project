@@ -25,6 +25,8 @@ int main(int argc, char** argv) {
 	table.size = 0;
 	unsigned int start_cluster = 2;
 
+	printf("Use help to view available commands\n");
+
 	while(1) {
 		printf("$ ");
 		fgets(buf, 100, stdin);
@@ -33,7 +35,24 @@ int main(int argc, char** argv) {
 		pathparts cmd;
 		splitString(&cmd, buf, " ");
 
-		if(strcmp(cmd.parts[0], "exit") == 0) {
+		if(strcmp(cmd.parts[0], "help") == 0) {
+			printf("Available Commands:\n");
+			printf("exit\n");
+			printf("info\n");
+			printf("ls\n");
+			printf("size filename\n");
+			printf("cd dir_name\n");
+			printf("mkdir new_dir_name\n");
+			printf("creat new_filename\n");
+			printf("mv file destination\n");
+			printf("rm filename\n");
+			printf("cp filename new_filename/destination\n");
+			printf("open filename r/w/rw\n");
+			printf("close filename\n");
+			printf("read filename start_byte num_bytes\n");
+			printf("write filename start_byte num_bytes data\n");
+		}
+		else if(strcmp(cmd.parts[0], "exit") == 0) {
 			return 0;
 		}
 		else if(strcmp(cmd.parts[0], "info") == 0) {
